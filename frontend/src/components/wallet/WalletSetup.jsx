@@ -1,5 +1,5 @@
 import React from "react";
-import { Wallet, Plus, Download, Loader } from "lucide-react";
+import { Wallet, Plus, Loader, DownloadIcon, Loader2 } from "lucide-react";
 
 export default function WalletSetup({
   createWallet,
@@ -58,9 +58,9 @@ export default function WalletSetup({
             className="w-full bg-gray-900 text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? (
-              <Loader className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <Download className="w-5 h-5" />
+              <DownloadIcon className="w-5 h-5" />
             )}
             Import Wallet
           </button>

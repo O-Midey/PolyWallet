@@ -19,21 +19,21 @@ export default function WalletCard({
           <p className="text-purple-200 text-sm mb-1">Wallet Address</p>
           <div className="flex items-center gap-2">
             <p className="text-xl font-mono">
-              {truncateAddress(walletAddress)}
+              {/* {truncateAddress(walletAddress)} */}
             </p>
             <button
               onClick={() => copyToClipboard(walletAddress)}
               className="p-1 hover:bg-white/20 rounded transition-colors"
             >
-              {copied ? (
+              {/* {copied ? (
                 <Check className="w-4 h-4" />
               ) : (
                 <Copy className="w-4 h-4" />
-              )}
+              )} */}
             </button>
           </div>
         </div>
-        <Wallet className="w-8 h-8 opacity-80" />
+        {/* <Wallet className="w-8 h-8 opacity-80" /> */}
       </div>
 
       <div className="mb-4">
@@ -48,11 +48,11 @@ export default function WalletCard({
           onClick={() => setShowPrivateKey(!showPrivateKey)}
           className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm"
         >
-          {showPrivateKey ? (
+          {/* {showPrivateKey ? (
             <EyeOff className="w-4 h-4" />
           ) : (
             <Eye className="w-4 h-4" />
-          )}
+          )} */}
           {showPrivateKey ? "Hide" : "Show"} Private Key
         </button>
         {showPrivateKey && (
@@ -64,7 +64,7 @@ export default function WalletCard({
           onClick={resetWallet}
           className="ml-auto flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-all"
         >
-          <LogOut className="w-4 h-4" />
+          {/* <LogOut className="w-4 h-4" /> */}
           Logout
         </button>
       </div>

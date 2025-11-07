@@ -49,7 +49,7 @@ export default function WalletDashboard({
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          <Send className="w-4 h-4 inline mr-2" />
+          {/* <Send className="w-4 h-4 inline mr-2" /> */}
           Send
         </button>
         <button
@@ -60,7 +60,7 @@ export default function WalletDashboard({
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          <Clock className="w-4 h-4 inline mr-2" />
+          {/* <Clock className="w-4 h-4 inline mr-2" /> */}
           History
         </button>
       </div>
