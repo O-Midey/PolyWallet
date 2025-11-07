@@ -4,11 +4,12 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { connect } from "mongoose";
-import wallerRoutes from "./routes/walletRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
+import { routeLogger } from "./middlewares/logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,8 +20,14 @@ dotenv.config({ path: path.join(__dirname, "../.env") });
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+  })
+);
 app.use(json());
+app.use(routeLogger);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -40,7 +47,7 @@ app.get("/health", (req, res) => {
 });
 
 // Routes
-app.use("/api/wallet", wallerRoutes);
+app.use("/api/wallet", walletRoutes);
 app.use("/api/transaction", transactionRoutes);
 
 // Error handling

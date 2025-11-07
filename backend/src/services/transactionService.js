@@ -1,13 +1,16 @@
 import { ethers } from "ethers";
 import provider from "../utils/ethersProvider.js";
 import Wallet from "../models/wallet.js";
+import axios from "axios";
+
+const ETHERSCAN_API_BASE = "https://api.etherscan.io/v2/api";
+const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY || "";
 
 // send transaction
-export const sendTransaction = async (fromAddress, toAddress, amount) => {
-  const sender = await Wallet.findOne({ address: fromAddress.toLowerCase() });
-  if (!sender) throw new Error("Wallet not found");
+export const sendTransaction = async (fromPrivateKey, toAddress, amount) => {
+  console.log("Sending transaction:", { fromPrivateKey, toAddress, amount });
 
-  const wallet = new ethers.Wallet(sender.privateKey, provider);
+  const wallet = new ethers.Wallet(fromPrivateKey, provider);
   const tx = await wallet.sendTransaction({
     to: toAddress,
     value: ethers.parseEther(amount),
@@ -48,11 +51,67 @@ export const getTransactionStatus = async (hash) => {
   };
 };
 
-// get wallet history (basic)
-export const getWalletHistory = async (address) => {
-  const history = await provider.getLogs({
-    address,
-    fromBlock: "latest",
-  });
-  return history;
+export const getWalletHistory = async (address, page = 1, offset = 20) => {
+  try {
+    // Build URL with all parameters
+    const url = `${ETHERSCAN_API_BASE}?chainid=80002&module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=${page}&offset=${offset}&sort=desc&apikey=${POLYGONSCAN_API_KEY}`;
+
+    const response = await fetch(url);
+
+    // Check if response is ok (status 200-299)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Get the raw text first to see what we're getting
+    const text = await response.text();
+
+    // parse  as JSON
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      throw new Error(`Invalid JSON response: ${text.substring(0, 100)}`);
+    }
+
+    if (!data) {
+      throw new Error("No data received from API");
+    }
+
+    if (data.status !== "1") {
+      const errorMsg = `API Error: ${
+        data.message || "Unknown error"
+      } (Status: ${data.status})`;
+      throw new Error(errorMsg);
+    }
+
+    // Check if result is empty
+    if (!data.result || data.result.length === 0) {
+      return {
+        transactions: [],
+        totalCount: 0,
+      };
+    }
+
+    const transactions = data.result.map((tx) => ({
+      hash: tx.hash,
+      from: tx.from,
+      to: tx.to,
+      value: tx.value,
+      timestamp: parseInt(tx.timeStamp) * 1000,
+      blockNumber: parseInt(tx.blockNumber),
+      gasUsed: tx.gasUsed,
+      gasPrice: tx.gasPrice,
+      status: tx.isError === "0" ? "success" : "failed",
+      methodId: tx.methodId,
+      functionName: tx.functionName,
+    }));
+
+    return {
+      transactions,
+      totalCount: transactions.length,
+    };
+  } catch (error) {
+    throw error;
+  }
 };
