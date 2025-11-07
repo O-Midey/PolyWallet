@@ -46,7 +46,7 @@ export const useWalletStore = createStore((set, get) => ({
   amount: "",
   txHash: "",
   txStatus: null,
-  activeTab: "wallet",
+  activeTab: "send",
 
   // UI actions
   setShowPrivateKey: (showPrivateKey) => set({ showPrivateKey }),

@@ -65,6 +65,7 @@ export default function PolyWallet() {
             loading={state.loading}
             resetWallet={state.resetWallet}
             transactions={state.transactions}
+            truncateAddress={truncateAddress}
           />
         )}
       </div>
