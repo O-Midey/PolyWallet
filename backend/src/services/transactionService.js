@@ -1,22 +1,35 @@
 import { ethers } from "ethers";
 import provider from "../utils/ethersProvider.js";
-import Wallet from "../models/wallet.js";
-import axios from "axios";
 
 const ETHERSCAN_API_BASE = "https://api.etherscan.io/v2/api";
 const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY || "";
 
 // send transaction
 export const sendTransaction = async (fromPrivateKey, toAddress, amount) => {
-  console.log("Sending transaction:", { fromPrivateKey, toAddress, amount });
+  try {
+    console.log("Sending transaction:", { fromPrivateKey, toAddress, amount });
 
-  const wallet = new ethers.Wallet(fromPrivateKey, provider);
-  const tx = await wallet.sendTransaction({
-    to: toAddress,
-    value: ethers.parseEther(amount),
-  });
+    const wallet = new ethers.Wallet(fromPrivateKey, provider);
+    const tx = await wallet.sendTransaction({
+      to: toAddress,
+      value: ethers.parseEther(amount),
+    });
 
-  return tx;
+    // Wait for transaction to be mined
+    const receipt = await tx.wait();
+
+    return {
+      txHash: tx.hash,
+      to: toAddress,
+      value: tx.value.toString(),
+      blockNumber: receipt.blockNumber,
+      gasUsed: receipt.gasUsed.toString(),
+      status: receipt.status === 1 ? "success" : "failed",
+    };
+  } catch (error) {
+    console.error("Transaction error:", error);
+    throw error;
+  }
 };
 
 // get transaction status
@@ -30,6 +43,8 @@ export const getTransactionStatus = async (hash) => {
       ? "success"
       : "failed"
     : "pending";
+
+  const block = receipt ? await provider.getBlock(receipt.blockNumber) : null;
 
   return {
     hash: tx.hash,
@@ -45,9 +60,7 @@ export const getTransactionStatus = async (hash) => {
     cumulativeGasUsed: receipt?.cumulativeGasUsed.toString(),
     gasUsed: receipt?.gasUsed.toString(),
     logs: receipt?.logs || [],
-    timestamp: receipt
-      ? (await provider.getBlock(receipt.blockNumber)).timestamp
-      : null,
+    timestamp: block ? block.timestamp * 1000 : null, // Convert seconds to milliseconds
   };
 };
 
@@ -93,19 +106,35 @@ export const getWalletHistory = async (address, page = 1, offset = 20) => {
       };
     }
 
-    const transactions = data.result.map((tx) => ({
-      hash: tx.hash,
-      from: tx.from,
-      to: tx.to,
-      value: tx.value,
-      timestamp: parseInt(tx.timeStamp) * 1000,
-      blockNumber: parseInt(tx.blockNumber),
-      gasUsed: tx.gasUsed,
-      gasPrice: tx.gasPrice,
-      status: tx.isError === "0" ? "success" : "failed",
-      methodId: tx.methodId,
-      functionName: tx.functionName,
-    }));
+    const transactions = data.result.map((tx) => {
+      // Convert value from wei to MATIC
+      // PolygonScan API returns value as a decimal string
+      let amountInMatic = "0.0000";
+      try {
+        if (tx.value && tx.value !== "0") {
+          // Convert decimal string to BigInt, then format as ether
+          const valueInWei = BigInt(tx.value);
+          amountInMatic = ethers.formatEther(valueInWei.toString());
+        }
+      } catch (error) {
+        console.warn("Error converting transaction value:", error, tx.value);
+      }
+
+      return {
+        hash: tx.hash,
+        from: tx.from,
+        to: tx.to,
+        value: tx.value, // Keep raw value for reference
+        amount: parseFloat(amountInMatic).toFixed(4), // Formatted amount in MATIC
+        timestamp: parseInt(tx.timeStamp) * 1000, // Convert seconds to milliseconds
+        blockNumber: parseInt(tx.blockNumber),
+        gasUsed: tx.gasUsed,
+        gasPrice: tx.gasPrice,
+        status: tx.isError === "0" ? "success" : "failed",
+        methodId: tx.methodId,
+        functionName: tx.functionName,
+      };
+    });
 
     return {
       transactions,

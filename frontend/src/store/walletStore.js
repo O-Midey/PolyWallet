@@ -148,6 +148,17 @@ export const useWalletStore = createStore((set, get) => ({
       const txs = await api.fetchTransactions(walletAddress);
       set({ transactions: txs, loading: false });
       console.log("Fetched transactions:", txs);
+
+      // Extract and save unique recipient addresses from transaction history
+      const uniqueAddresses = txs
+        .map((tx) => tx.to)
+        .filter((addr, idx, arr) => addr && arr.indexOf(addr) === idx);
+
+      uniqueAddresses.forEach((addr) => {
+        if (addr && /^0x[a-fA-F0-9]{40}$/.test(addr)) {
+          get().addRecentAddress(addr);
+        }
+      });
     } catch (err) {
       console.error("Failed to fetch transactions:", err);
       set({ error: err.message, loading: false });
@@ -160,6 +171,11 @@ export const useWalletStore = createStore((set, get) => ({
     const result = await api.sendTransaction(privateKey, recipient, amount);
     console.log("Send transaction result:", result);
     if (result?.success) {
+      // Save recipient to recent addresses
+      if (recipient && /^0x[a-fA-F0-9]{40}$/.test(recipient)) {
+        get().addRecentAddress(recipient);
+      }
+
       set({
         txHash: result.tx.txHash,
         recipient: result.tx.to,
@@ -176,6 +192,44 @@ export const useWalletStore = createStore((set, get) => ({
     }
 
     set({ loading: false });
+  },
+
+  addRecentAddress: (address) => {
+    try {
+      const key = `recentAddresses_${get().walletAddress}`;
+      const stored = localStorage.getItem(key);
+      const recentAddresses = stored ? JSON.parse(stored) : [];
+
+      // Remove if already exists and add to front
+      const filtered = recentAddresses.filter(
+        (addr) => addr.toLowerCase() !== address.toLowerCase()
+      );
+      const updated = [address, ...filtered].slice(0, 10); // Keep only last 10
+
+      localStorage.setItem(key, JSON.stringify(updated));
+    } catch (error) {
+      console.error("Failed to save recent address:", error);
+    }
+  },
+
+  getRecentAddresses: () => {
+    try {
+      const key = `recentAddresses_${get().walletAddress}`;
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+      // Also extract from transaction history
+      const { transactions } = get();
+      const addressesFromTxs = transactions
+        .map((tx) => tx.to)
+        .filter((addr, idx, arr) => addr && arr.indexOf(addr) === idx)
+        .slice(0, 10);
+      return addressesFromTxs;
+    } catch (error) {
+      console.error("Failed to get recent addresses:", error);
+      return [];
+    }
   },
 
   checkTxStatus: async (hash) => {

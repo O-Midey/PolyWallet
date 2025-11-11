@@ -3,10 +3,22 @@ import * as txService from "../services/transactionService.js";
 export const sendTransaction = async (req, res) => {
   try {
     const { from, to, amount } = req.body;
+
+    if (!from || !to || !amount) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields: from, to, amount",
+      });
+    }
+
     const tx = await txService.sendTransaction(from, to, amount);
     res.status(200).json({ success: true, tx });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Send transaction error:", err);
+    res.status(500).json({
+      success: false,
+      error: err.message,
+    });
   }
 };
 
