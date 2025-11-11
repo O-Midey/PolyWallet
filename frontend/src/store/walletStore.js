@@ -166,25 +166,42 @@ export const useWalletStore = createStore((set, get) => ({
   },
 
   sendTransaction: async () => {
-    const { privateKey, recipient, amount } = get();
+    const { privateKey, recipient, amount, transactions } = get();
     set({ loading: true });
+
     const result = await api.sendTransaction(privateKey, recipient, amount);
     console.log("Send transaction result:", result);
+
     if (result?.success) {
       // Save recipient to recent addresses
       if (recipient && /^0x[a-fA-F0-9]{40}$/.test(recipient)) {
         get().addRecentAddress(recipient);
       }
 
+      // Format new transaction
+      const newTx = {
+        hash: result.tx.txHash,
+        to: result.tx.to,
+        amount: ethers.formatUnits(result.tx.value, 18),
+        status: "pending",
+        timestamp: Date.now(),
+      };
+
+      // ✅ Instantly show new transaction in UI
       set({
+        transactions: [newTx, ...transactions],
         txHash: result.tx.txHash,
         recipient: result.tx.to,
         amount: ethers.formatUnits(result.tx.value, 18),
       });
+
       get().showNotification("Transaction sent successfully!");
 
-      await get().fetchBalance();
-      await get().fetchTransactions();
+      // Fetch updates after a short delay to get confirmed data
+      setTimeout(async () => {
+        await get().fetchBalance();
+        await get().fetchTransactions();
+      }, 4000); // waiting a few seconds for blockchain indexers to catch up
     } else {
       get().showNotification("Transaction failed", "error");
     }
