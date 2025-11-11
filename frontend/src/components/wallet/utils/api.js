@@ -1,10 +1,11 @@
 // lib/api.js
 const API_BASE = import.meta.env.VITE_API_BASE;
 console.log(API_BASE);
+
 const api = {
   createWallet: async () => {
     try {
-      const res = await fetch(`${API_BASE}/wallet/create`, {
+      const res = await fetch(`${API_BASE}/api/wallet/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: "user_" + Date.now() }),
@@ -19,7 +20,7 @@ const api = {
 
   importWallet: async (privateKey) => {
     console.log("Sending to backend:", { privateKey });
-    const res = await fetch(`${API_BASE}/wallet/import`, {
+    const res = await fetch(`${API_BASE}/api/wallet/import`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ privateKey }),
@@ -31,7 +32,9 @@ const api = {
 
   fetchBalance: async (walletAddress, setBalance) => {
     try {
-      const res = await fetch(`${API_BASE}/wallet/${walletAddress}/balance`);
+      const res = await fetch(
+        `${API_BASE}/api/wallet/${walletAddress}/balance`
+      );
       const data = await res.json();
       setBalance(data.balance);
     } catch (err) {
@@ -41,7 +44,7 @@ const api = {
 
   fetchTransactions: async (address) => {
     try {
-      const res = await fetch(`${API_BASE}/transaction/${address}/history`);
+      const res = await fetch(`${API_BASE}/api/transaction/${address}/history`);
       const data = await res.json();
       console.log("Fetched transactions data for:", address, data);
       return data.history || [];
@@ -53,7 +56,7 @@ const api = {
 
   sendTransaction: async (fromPrivateKey, to, amount) => {
     try {
-      const res = await fetch(`${API_BASE}/transaction/send`, {
+      const res = await fetch(`${API_BASE}/api/transaction/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ from: fromPrivateKey, to, amount }),
@@ -67,7 +70,7 @@ const api = {
 
   checkTxStatus: async (hash) => {
     try {
-      const res = await fetch(`${API_BASE}/transaction/${hash}/status`);
+      const res = await fetch(`${API_BASE}/api/transaction/${hash}/status`);
       return await res.json();
     } catch (err) {
       console.error("Check tx status failed:", err);

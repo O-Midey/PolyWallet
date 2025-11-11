@@ -131,7 +131,7 @@ export default function WalletWelcome({
               </div>
             </div>
             <p className="font-mono text-sm break-all text-black bg-white px-3 py-2 rounded-lg border border-gray-200">
-              {showPrivateKey ? privateKey : "•".repeat(64)}
+              {showPrivateKey ? privateKey : "•".repeat(34)}
             </p>
           </div>
         </div>
