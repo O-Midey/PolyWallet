@@ -1,6 +1,7 @@
 import React from "react";
 import PolyWallet from "./components/wallet/polywallet";
 import ErrorBoundary from "./components/wallet/ErrorBoundary";
+
 const API_BASE = import.meta.env.VITE_API_BASE;
 export default function App() {
   return (

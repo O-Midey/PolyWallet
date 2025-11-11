@@ -26,7 +26,7 @@ export default function WalletDashboard({
   getRecentAddresses,
 }) {
   return (
-    <div className="flex flex-col h-full relative max-w-4xl mx-auto">
+    <div className="flex flex-col h-full relative w-full max-w-4xl mx-auto">
       {/* Single Unified Container */}
       <div className="bg-white rounded-3xl shadow-lg border border-gray-200 flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Wallet Info Section */}

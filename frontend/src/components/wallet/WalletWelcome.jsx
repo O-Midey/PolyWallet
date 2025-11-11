@@ -12,19 +12,30 @@ import {
 export default function WalletWelcome({
   walletAddress,
   privateKey,
-  copied,
-  copyToClipboard,
   showPrivateKey,
   setShowPrivateKey,
   proceedToWallet,
 }) {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(false);
 
   useEffect(() => {
     setIsAnimating(true);
     const timer = setTimeout(() => setIsAnimating(false), 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  const copyToClipboard = async (text, type) => {
+    await navigator.clipboard.writeText(text);
+    if (type === "address") {
+      setCopiedAddress(true);
+      setTimeout(() => setCopiedAddress(false), 2000);
+    } else {
+      setCopiedKey(true);
+      setTimeout(() => setCopiedKey(false), 2000);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto w-full">
@@ -76,14 +87,14 @@ export default function WalletWelcome({
                 Wallet Address
               </label>
               <button
-                onClick={() => copyToClipboard(walletAddress)}
+                onClick={() => copyToClipboard(walletAddress, "address")}
                 className={`flex items-center gap-1 text-sm transition-all duration-200 rounded-lg px-2 py-1 ${
-                  copied
+                  copiedAddress
                     ? "bg-green-100 text-green-700"
                     : "text-black hover:text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                {copied ? (
+                {copiedAddress ? (
                   <>
                     <Check className="w-4 h-4" />
                     Copied
@@ -118,15 +129,24 @@ export default function WalletWelcome({
                   )}
                 </button>
                 <button
-                  onClick={() => copyToClipboard(privateKey)}
+                  onClick={() => copyToClipboard(privateKey, "key")}
                   className={`flex items-center gap-1 text-sm transition-all duration-200 rounded-lg px-2 py-1 ${
-                    copied
+                    copiedKey
                       ? "bg-green-100 text-green-700"
                       : "text-black hover:text-gray-700 hover:bg-gray-100"
                   }`}
                 >
-                  <Copy className="w-4 h-4" />
-                  Copy
+                  {copiedKey ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      Copy
+                    </>
+                  )}
                 </button>
               </div>
             </div>

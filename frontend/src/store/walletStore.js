@@ -183,10 +183,8 @@ export const useWalletStore = createStore((set, get) => ({
       });
       get().showNotification("Transaction sent successfully!");
 
-      setTimeout(() => {
-        get().fetchBalance();
-        get().fetchTransactions();
-      }, 2000);
+      await get().fetchBalance();
+      await get().fetchTransactions();
     } else {
       get().showNotification("Transaction failed", "error");
     }

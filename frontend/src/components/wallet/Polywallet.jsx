@@ -24,7 +24,7 @@ export default function PolyWallet() {
   }, [state.walletAddress, state.screen]);
 
   return (
-    <div className="h-full bg-black flex flex-col overflow-hidden">
+    <div className="h-full bg-black flex flex-col overflow-hidden w-full">
       {state.notification && <Notification notification={state.notification} />}
 
       <div
@@ -48,7 +48,6 @@ export default function PolyWallet() {
             walletAddress={state.walletAddress}
             privateKey={state.privateKey}
             copied={state.copied}
-            copyToClipboard={state.copyToClipboard}
             showPrivateKey={state.showPrivateKey}
             setShowPrivateKey={state.setShowPrivateKey}
             proceedToWallet={state.proceedToWallet}

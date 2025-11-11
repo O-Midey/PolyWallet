@@ -23,13 +23,6 @@ export default function TransactionHistory({
       // If it's a string, try parsing it
       date = new Date(timestamp);
     } else if (typeof timestamp === "number") {
-      // Backend converts seconds to milliseconds (timestamp * 1000)
-      // So if we receive a number, it should already be in milliseconds
-      // But check: if it's less than year 2000 in milliseconds, it might be in seconds
-      // Year 2000 in milliseconds: 946684800000
-      // Year 2020 in seconds: 1577836800
-      // Year 2020 in milliseconds: 1577836800000
-
       // If timestamp is less than 10000000000, it's definitely in seconds (before year 2286)
       if (timestamp < 10000000000) {
         date = new Date(timestamp * 1000);

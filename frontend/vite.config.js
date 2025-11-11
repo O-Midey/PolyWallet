@@ -9,5 +9,5 @@ const __dirname = dirname(__filename);
 
 export default defineConfig({
   plugins: [react()],
-  envDir: resolve(__dirname, "../"), // Point to root directory
+  envDir: resolve(__dirname, "../"),
 });
