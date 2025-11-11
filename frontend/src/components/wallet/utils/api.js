@@ -1,6 +1,6 @@
 // lib/api.js
-const API_BASE = "http://localhost:3000/api";
-
+const API_BASE = import.meta.env.VITE_API_BASE;
+console.log(API_BASE);
 const api = {
   createWallet: async () => {
     try {

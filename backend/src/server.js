@@ -6,17 +6,17 @@ import rateLimit from "express-rate-limit";
 import { connect } from "mongoose";
 import walletRoutes from "./routes/walletRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
-
 import path from "path";
 import { fileURLToPath } from "url";
 import { routeLogger } from "./middlewares/logger.js";
 
+// Load .env FIRST before anything else
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, "../.env") });
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-dotenv.config({ path: path.join(__dirname, "../.env") });
 
 // Middleware
 app.use(helmet());
@@ -84,5 +84,15 @@ connect(process.env.MONGODB_URI)
     });
   })
   .catch((err) => console.error("❌ MongoDB Connection Failed:", err));
+
+process.on("SIGTERM", () => {
+  console.log("👋 SIGTERM received, shutting down gracefully");
+  process.exit(0);
+});
+
+process.on("SIGINT", () => {
+  console.log("👋 SIGINT received, shutting down gracefully");
+  process.exit(0);
+});
 
 export default app;

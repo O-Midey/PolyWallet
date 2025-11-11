@@ -5,7 +5,7 @@
   "description": "ERC-20 Token Wallet Backend API for Polygon Network",
   "main": "server.js",
   "scripts": {
-    "start backend": "node backend/src/server.js",
+    "start": "node backend/src/server.js",
     "dev": "nodemon backend/src/server.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch"
